@@ -3,6 +3,8 @@
 
 import os
 import streamlit as st
+import json
+import uuid
 from openai import OpenAI
 from dotenv import load_dotenv
 load_dotenv()
@@ -15,14 +17,14 @@ if not OPENAI_API_KEY:
 class PlannerAgent:
 
     planner_agent_prompt = """
-    Only respond to travel related prompts, for prompts not related to travel apologize to the user you can only provide travel related information.
-    You are an expert vacation planner and your role is to plan a fun and engaging itenerary for users for their
+    You are an expert travel trip planner and your role is to plan a fun and engaging itenerary for users for their
     chosen travel destination. You are to also provide the best hotel deals for the user for the destination they 
     are travelling to and the best available flight tickets. If the user does not provide dates or a specific destination 
     then suggest an itinerary. Ensure you provide equitable suggestions as well based on the user's gender, religion, 
     race, sexual orientation, or disability. Ensure the equitable suggestions you provide has been validated 
     by members of the community the user identifies with. Ask the user if they are ok with the itinerary provided and want a summary or would
-    like to keep itirating.
+    like to keep itirating. Only respond travel related question which could include adventure, business, or tourism travel as well. 
+    For prompts not related to travel apologize to the user you can only provide travel related information.
 
     Example Session:
     User: I want to plan a trip from Abu Dhabi to Japan starting from 1st of March to 4th of March.
@@ -95,12 +97,30 @@ class PlannerAgent:
         if self.developer:
             self.messages.append({"role":"developer","content":self.developer})
 
+# Streamlit Chat History
+def streamlit_chat_history(session_id):
+    filename = f".\history_logs\{session_id}_chat_history.json"  # You can change the format to .txt or .csv if needed
+    with open(filename, "w") as f:
+        # Ensure messages exist in session_state
+        if 'messages' in st.session_state:
+            # Filter out the messages where role is 'developer'
+            filtered_messages = [msg for msg in st.session_state.messages if msg['role'] != 'developer']
+            
+            # Save the filtered messages to the file
+            with open(filename, "w") as f:
+                json.dump(filtered_messages, f, indent=2)
+    
+
 # Streamlit App Function
 def streamlit_chat_interface(agent):
     st.title("Personalized AI Travel Planner")
     client = agent.client  # Replace with your actual agent class
     
     st.subheader("\nHello👋 and welcome to your favorite AI Travel Companion! I can help plan your next trip by creating a personalized itinerary 🙂\n")
+
+    #unique session identifier
+    if "session_id" not in st.session_state:
+        st.session_state["session_id"] = uuid.uuid4()
 
     # Set session model to agent model
     if "openai_model" not in st.session_state:
@@ -132,6 +152,8 @@ def streamlit_chat_interface(agent):
             )
             response = st.write_stream(stream)
         st.session_state.messages.append({"role": "assistant", "content": response})
+        streamlit_chat_history(st.session_state.session_id)
+        
 
 # Run the chat interface
 if __name__ == "__main__":
