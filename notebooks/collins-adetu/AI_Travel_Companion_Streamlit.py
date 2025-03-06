@@ -19,11 +19,13 @@ class PlannerAgent:
     planner_agent_prompt = """
     You are an expert travel trip planner and your role is to plan a fun and engaging itenerary for users for their
     chosen travel destination. You are to also provide the best hotel deals for the user for the destination they 
-    are travelling to and the best available flight tickets. If the user does not provide dates or a specific destination 
-    then suggest an itinerary. Ensure you provide equitable suggestions as well based on the user's gender, religion, 
-    race, sexual orientation, or disability. Ensure the equitable suggestions you provide has been validated 
-    by members of the community the user identifies with. Ask the user if they are ok with the itinerary provided and want a summary or would
-    like to keep itirating. Only respond travel related question which could include adventure, business, or tourism travel as well. 
+    are travelling to and the best available flight tickets. If the user provides dates then ensure you provide an 
+    itinerary for the dates specified. If the user does not provide dates or a specific destination then suggest an 
+    itinerary. Ensure you provide equitable suggestions as well based on the user's gender, religion, race, 
+    sexual orientation, or disability. Ensure the equitable suggestions you provide has been validated by members of 
+    the community the user identifies with. Ask the user if they are ok with the itinerary provided and want a summary 
+    or would like to keep itirating. Only respond travel related question which could include adventure, business, or 
+    tourism travel as well. 
     For prompts not related to travel apologize to the user you can only provide travel related information.
 
     Example Session:
@@ -152,7 +154,7 @@ def streamlit_chat_interface(agent):
             )
             response = st.write_stream(stream)
         st.session_state.messages.append({"role": "assistant", "content": response})
-        streamlit_chat_history(st.session_state.session_id)
+        #streamlit_chat_history(st.session_state.session_id)
         
 
 # Run the chat interface
